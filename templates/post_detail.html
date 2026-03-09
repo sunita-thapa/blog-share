@@ -1,0 +1,147 @@
+{# post_detail.html — Single Blog Post Page #}
+{% extends 'base.html' %}
+{% block title %}{{ post.title }}{% endblock %}
+{% block meta_desc %}{{ post.excerpt or post.content[:150] }}{% endblock %}
+
+{% block content %}
+
+{# Post Header #}
+<div style="background:linear-gradient(135deg, var(--dark), #1e3a5f); padding:4rem 0; color:white;">
+  <div class="container" style="max-width:800px;">
+    <span class="tag tag-crimson mb-3 d-inline-block">{{ post.category }}</span>
+    <h1 style="font-family:var(--font-head); font-size:clamp(1.8rem,4vw,2.8rem); color:white; line-height:1.2;">
+      {{ post.title }}
+    </h1>
+    {% if post.excerpt %}
+    <p style="color:#cbd5e1; font-size:1.1rem; margin-top:1rem; max-width:640px;">{{ post.excerpt }}</p>
+    {% endif %}
+
+    <div class="d-flex align-items-center gap-3 flex-wrap mt-3">
+      <div class="d-flex align-items-center gap-2">
+        {% if post.author.avatar_url %}
+          <img src="{{ post.author.avatar_url }}" alt="" width="36" height="36"
+               style="border-radius:50%;object-fit:cover;border:2px solid var(--sky);">
+        {% else %}
+          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--sky),var(--crimson));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">
+            {{ (post.author.full_name or post.author.username)[0].upper() }}
+          </div>
+        {% endif %}
+        <div>
+          <div class="fw-600" style="font-size:.9rem;">
+            <a href="{{ url_for('portfolio', username=post.author.username) }}"
+               style="color:white;">{{ post.author.full_name or post.author.username }}</a>
+          </div>
+          <div style="font-size:.75rem; color:#94a3b8;">{{ post.created_at | format_date }}</div>
+        </div>
+      </div>
+      <span style="color:#64748b;">·</span>
+      <span style="color:#94a3b8; font-size:.85rem;">
+        <i class="fa-regular fa-clock me-1"></i>{{ post.reading_time() }}
+      </span>
+      <span class="views-badge">
+        <i class="fa-regular fa-eye"></i> {{ post.views }} views
+      </span>
+    </div>
+  </div>
+</div>
+
+{# Cover Image #}
+{% if post.cover_image %}
+<div class="container mt-4" style="max-width:800px;">
+  <img src="{{ post.cover_image }}" alt="{{ post.title }}"
+       style="width:100%; max-height:400px; object-fit:cover; border-radius:var(--radius);" />
+</div>
+{% endif %}
+
+{# Post Body #}
+<div class="container mt-4 mb-5" style="max-width:800px;">
+  <div class="row">
+    <div class="col-lg-8">
+
+      {# Article Content #}
+      <article class="post-body card p-4 p-md-5 mb-4">
+        {{ post.content }}
+      </article>
+
+      {# Tags #}
+      {% if post.get_tags_list() %}
+      <div class="mb-4">
+        <strong class="text-muted small me-2">TAGS:</strong>
+        {% for tag in post.get_tags_list() %}
+          <span class="tag">{{ tag }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {# Edit / Delete (only for the author) #}
+      {% if current_user and current_user.id == post.user_id %}
+      <div class="d-flex gap-2 mb-4">
+        <a href="{{ url_for('edit_post', post_id=post.id) }}" class="btn-outline-sky btn btn-sm">
+          <i class="fa-regular fa-pen-to-square me-1"></i> Edit Post
+        </a>
+        <form method="POST" action="{{ url_for('delete_post', post_id=post.id) }}">
+          <button type="button" class="btn-outline-crimson btn btn-sm delete-trigger"
+                  data-name="{{ post.title }}">
+            <i class="fa-regular fa-trash-can me-1"></i> Delete
+          </button>
+        </form>
+      </div>
+      {% endif %}
+
+    </div>
+
+    {# Author Sidebar #}
+    <div class="col-lg-4">
+      <div class="card p-4 text-center sticky-top" style="top:80px;">
+        <div class="d-flex justify-content-center mb-3">
+          {% if post.author.avatar_url %}
+            <img src="{{ post.author.avatar_url }}" alt="" width="72" height="72"
+                 style="border-radius:50%;object-fit:cover;border:3px solid var(--sky);">
+          {% else %}
+            <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--sky),var(--crimson));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1.6rem;">
+              {{ (post.author.full_name or post.author.username)[0].upper() }}
+            </div>
+          {% endif %}
+        </div>
+        <h6 class="fw-700" style="font-family:var(--font-head);">
+          {{ post.author.full_name or post.author.username }}
+        </h6>
+        <p class="text-muted small mb-3">
+          {{ post.author.bio | truncate(100) if post.author.bio else 'Writer at BlogSphere' }}
+        </p>
+        <a href="{{ url_for('portfolio', username=post.author.username) }}"
+           class="btn-sky btn btn-sm w-100">
+          View Portfolio
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  {# Related Posts #}
+  {% if related_posts %}
+  <div class="mt-5">
+    <h4 class="fw-700 mb-4" style="font-family:var(--font-head);">
+      More in <span class="text-sky">{{ post.category }}</span>
+    </h4>
+    <div class="row g-3">
+      {% for rp in related_posts %}
+      <div class="col-md-4">
+        <div class="card h-100">
+          <div class="post-card-img-placeholder" style="height:120px;">📝</div>
+          <div class="card-body p-3">
+            <span class="card-category small">{{ rp.category }}</span>
+            <h6 class="card-title mt-1" style="font-size:.9rem;">
+              <a href="{{ url_for('post_detail', slug=rp.slug) }}">{{ rp.title }}</a>
+            </h6>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}

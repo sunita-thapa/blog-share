@@ -1,0 +1,288 @@
+{# dashboard.html — User Dashboard #}
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex">
+
+  {# ---- SIDEBAR ---- #}
+  <aside id="dashboardSidebar" class="dashboard-sidebar d-none d-lg-block">
+    <div class="px-4 mb-3 d-flex align-items-center gap-2">
+      {% if user.avatar_url %}
+        <img src="{{ user.avatar_url }}" alt="" width="36" height="36"
+             style="border-radius:50%; object-fit:cover; border:2px solid var(--sky);">
+      {% else %}
+        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--sky),var(--crimson));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:.9rem;">
+          {{ (user.full_name or user.username)[0].upper() }}
+        </div>
+      {% endif %}
+      <div>
+        <div class="fw-600" style="font-size:.9rem;">{{ user.full_name or user.username }}</div>
+        <div class="text-muted" style="font-size:.75rem;">@{{ user.username }}</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section-label">Overview</div>
+    <a href="{{ url_for('dashboard') }}" class="sidebar-link active">
+      <i class="fa-solid fa-gauge"></i> Dashboard
+    </a>
+    <a href="{{ url_for('portfolio', username=user.username) }}" class="sidebar-link" target="_blank">
+      <i class="fa-solid fa-up-right-from-square"></i> View Portfolio
+    </a>
+
+    <div class="sidebar-section-label">Content</div>
+    <a href="{{ url_for('new_post') }}" class="sidebar-link">
+      <i class="fa-solid fa-pen"></i> New Post
+    </a>
+    <a href="{{ url_for('new_project') }}" class="sidebar-link">
+      <i class="fa-solid fa-folder-plus"></i> New Project
+    </a>
+    <a href="{{ url_for('new_skill') }}" class="sidebar-link">
+      <i class="fa-solid fa-star"></i> Add Skill
+    </a>
+    <a href="{{ url_for('new_technology') }}" class="sidebar-link">
+      <i class="fa-solid fa-microchip"></i> Add Technology
+    </a>
+
+    <div class="sidebar-section-label">Account</div>
+    <a href="{{ url_for('edit_profile') }}" class="sidebar-link">
+      <i class="fa-regular fa-user"></i> Edit Profile
+    </a>
+    <a href="{{ url_for('logout') }}" class="sidebar-link">
+      <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+    </a>
+  </aside>
+
+  {# ---- MAIN ---- #}
+  <main class="dashboard-main flex-grow-1">
+
+    {# Header #}
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+      <div>
+        <h2 style="font-family:var(--font-head); font-size:1.7rem; margin:0;">
+          Good day, {{ user.full_name or user.username }}! 👋
+        </h2>
+        <p class="text-muted small mb-0">Here's what's happening with your content today.</p>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="{{ url_for('new_post') }}" class="btn-sky btn btn-sm">
+          <i class="fa-solid fa-pen me-1"></i> Write Post
+        </a>
+        <a href="{{ url_for('edit_profile') }}" class="btn-outline-sky btn btn-sm">
+          <i class="fa-regular fa-user me-1"></i> Profile
+        </a>
+      </div>
+    </div>
+
+    {# ---- STATS ROW ---- #}
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon sky"><i class="fa-solid fa-newspaper"></i></div>
+          <div>
+            <div class="stat-number">{{ stats.posts }}</div>
+            <div class="stat-label">Total Posts</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fa-solid fa-check-circle"></i></div>
+          <div>
+            <div class="stat-number">{{ stats.published }}</div>
+            <div class="stat-label">Published</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon red"><i class="fa-regular fa-eye"></i></div>
+          <div>
+            <div class="stat-number">{{ stats.total_views }}</div>
+            <div class="stat-label">Total Views</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon amber"><i class="fa-solid fa-folder-open"></i></div>
+          <div>
+            <div class="stat-number">{{ stats.projects }}</div>
+            <div class="stat-label">Projects</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# ---- POSTS TABLE ---- #}
+    <div class="card mb-4">
+      <div class="card-body p-0">
+        <div class="d-flex align-items-center justify-content-between p-3 border-bottom">
+          <h5 class="mb-0 fw-700" style="font-family:var(--font-head);">
+            <i class="fa-solid fa-newspaper text-sky me-2"></i>My Posts
+          </h5>
+          <a href="{{ url_for('new_post') }}" class="btn-sky btn btn-sm">+ New Post</a>
+        </div>
+
+        {% if posts %}
+        <div class="table-responsive">
+          <table class="table table-custom mb-0">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Views</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for post in posts %}
+              <tr>
+                <td>
+                  <span class="fw-600">{{ post.title | truncate(40) }}</span>
+                </td>
+                <td><span class="tag">{{ post.category }}</span></td>
+                <td>
+                  <span class="publish-badge {{ 'published' if post.is_published else 'draft' }}">
+                    {{ 'Published' if post.is_published else 'Draft' }}
+                  </span>
+                </td>
+                <td><span class="views-badge"><i class="fa-regular fa-eye me-1"></i>{{ post.views }}</span></td>
+                <td class="text-muted small">{{ post.created_at | format_date }}</td>
+                <td>
+                  <div class="d-flex gap-1">
+                    {% if post.is_published %}
+                    <a href="{{ url_for('post_detail', slug=post.slug) }}"
+                       class="action-btn view" title="View"><i class="fa-regular fa-eye"></i></a>
+                    {% endif %}
+                    <a href="{{ url_for('edit_post', post_id=post.id) }}"
+                       class="action-btn edit" title="Edit"><i class="fa-regular fa-pen-to-square"></i></a>
+                    <form method="POST" action="{{ url_for('delete_post', post_id=post.id) }}" style="display:inline;">
+                      <button type="button" class="action-btn delete delete-trigger"
+                              data-name="{{ post.title }}" title="Delete">
+                        <i class="fa-regular fa-trash-can"></i>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+          <div style="font-size:3rem;">✍️</div>
+          <p class="mt-2">No posts yet. <a href="{{ url_for('new_post') }}">Write your first one!</a></p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {# ---- PROJECTS / SKILLS / TECH ROW ---- #}
+    <div class="row g-4">
+
+      {# Projects mini list #}
+      <div class="col-lg-4">
+        <div class="card h-100">
+          <div class="card-body p-0">
+            <div class="d-flex align-items-center justify-content-between p-3 border-bottom">
+              <h6 class="mb-0 fw-700"><i class="fa-solid fa-folder-open text-crimson me-2"></i>Projects</h6>
+              <a href="{{ url_for('new_project') }}" class="btn-crimson btn btn-sm" style="font-size:.75rem;">+ Add</a>
+            </div>
+            {% if projects %}
+              {% for project in projects[:5] %}
+              <div class="d-flex align-items-center justify-content-between p-3 border-bottom"
+                   style="font-size:.88rem;">
+                <span class="fw-600">{{ project.title | truncate(25) }}</span>
+                <div class="d-flex gap-1">
+                  <a href="{{ url_for('edit_project', project_id=project.id) }}"
+                     class="action-btn edit"><i class="fa-regular fa-pen-to-square"></i></a>
+                  <form method="POST" action="{{ url_for('delete_project', project_id=project.id) }}">
+                    <button type="button" class="action-btn delete delete-trigger"
+                            data-name="{{ project.title }}"><i class="fa-regular fa-trash-can"></i></button>
+                  </form>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="p-4 text-center text-muted small">No projects yet.</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      {# Skills mini list #}
+      <div class="col-lg-4">
+        <div class="card h-100">
+          <div class="card-body p-0">
+            <div class="d-flex align-items-center justify-content-between p-3 border-bottom">
+              <h6 class="mb-0 fw-700"><i class="fa-solid fa-star text-sky me-2"></i>Skills</h6>
+              <a href="{{ url_for('new_skill') }}" class="btn-sky btn btn-sm" style="font-size:.75rem;">+ Add</a>
+            </div>
+            {% if skills %}
+              {% for skill in skills[:5] %}
+              <div class="p-3 border-bottom">
+                <div class="d-flex justify-content-between align-items-center mb-1" style="font-size:.85rem;">
+                  <span class="fw-600">{{ skill.name }}</span>
+                  <div class="d-flex align-items-center gap-1">
+                    <span class="text-muted small">{{ skill.proficiency }}%</span>
+                    <a href="{{ url_for('edit_skill', skill_id=skill.id) }}"
+                       class="action-btn edit" style="width:24px;height:24px;font-size:.7rem;"><i class="fa-regular fa-pen-to-square"></i></a>
+                    <form method="POST" action="{{ url_for('delete_skill', skill_id=skill.id) }}">
+                      <button type="button" class="action-btn delete delete-trigger"
+                              data-name="{{ skill.name }}"
+                              style="width:24px;height:24px;font-size:.7rem;"><i class="fa-regular fa-trash-can"></i></button>
+                    </form>
+                  </div>
+                </div>
+                <div class="skill-bar-bg">
+                  <div class="skill-bar-fill" data-width="{{ skill.proficiency }}"></div>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="p-4 text-center text-muted small">No skills added yet.</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      {# Technologies mini list #}
+      <div class="col-lg-4">
+        <div class="card h-100">
+          <div class="card-body p-0">
+            <div class="d-flex align-items-center justify-content-between p-3 border-bottom">
+              <h6 class="mb-0 fw-700"><i class="fa-solid fa-microchip text-crimson me-2"></i>Technologies</h6>
+              <a href="{{ url_for('new_technology') }}" class="btn-crimson btn btn-sm" style="font-size:.75rem;">+ Add</a>
+            </div>
+            <div class="p-3 d-flex flex-wrap gap-2">
+              {% if technologies %}
+                {% for tech in technologies %}
+                <div class="d-flex align-items-center gap-1">
+                  <span class="tag" style="background:{{ tech.badge_color }}22; color:{{ tech.badge_color }}; border:1px solid {{ tech.badge_color }}44;">
+                    {{ tech.name }}
+                  </span>
+                  <a href="{{ url_for('edit_technology', tech_id=tech.id) }}"
+                     class="action-btn edit" style="width:20px;height:20px;font-size:.65rem;"><i class="fa-regular fa-pen-to-square"></i></a>
+                  <form method="POST" action="{{ url_for('delete_technology', tech_id=tech.id) }}">
+                    <button type="button" class="action-btn delete delete-trigger"
+                            data-name="{{ tech.name }}"
+                            style="width:20px;height:20px;font-size:.65rem;"><i class="fa-regular fa-trash-can"></i></button>
+                  </form>
+                </div>
+                {% endfor %}
+              {% else %}
+                <p class="text-muted small">No technologies added yet.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>{# end row #}
+  </main>
+</div>
+{% endblock %}

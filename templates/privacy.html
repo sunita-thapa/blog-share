@@ -1,0 +1,38 @@
+{# privacy.html #}
+{% extends 'base.html' %}
+{% block title %}Privacy Policy{% endblock %}
+{% block content %}
+<div style="background:linear-gradient(135deg,var(--dark),#1e3a5f);padding:3rem 0;color:white;">
+  <div class="container"><div class="divider-sky"></div>
+    <h1 style="font-family:var(--font-head);color:white;font-size:2rem;">Privacy Policy</h1>
+    <p style="color:#94a3b8;">Last updated: January 2025</p>
+  </div>
+</div>
+<div class="section-pad">
+  <div class="container" style="max-width:760px;">
+    <div class="card p-4 p-md-5">
+      {% for heading, body in [
+        ('1. What Information We Collect',
+         'When you register, we collect your username, email address, and password (stored as a secure hash — we never see your plain-text password). When you create posts, projects, skills, or technologies, that content is stored and associated with your account.'),
+        ('2. How We Use Your Information',
+         'Your information is used solely to operate BlogSphere — to display your profile, authenticate your login, and show your published content. We do not sell, rent, or share your personal data with third parties.'),
+        ('3. Cookies',
+         'BlogSphere uses a small number of cookies essential to make the site work — specifically a session cookie that keeps you logged in. We do not use tracking or advertising cookies. See our Cookie Policy for details.'),
+        ('4. Data Security',
+         'Passwords are hashed using industry-standard algorithms (Werkzeug / bcrypt). Sessions are protected with a secret key. We recommend choosing a strong, unique password.'),
+        ('5. Your Rights',
+         'You can update or delete your content at any time from your Dashboard. To permanently delete your account and all associated data, please contact us via the Contact page.'),
+        ('6. Children\'s Privacy',
+         'BlogSphere is not directed at children under 13. We do not knowingly collect personal information from children.'),
+        ('7. Changes to This Policy',
+         'We may update this Privacy Policy from time to time. We will notify users of significant changes by posting a notice on the site.'),
+        ('8. Contact',
+         'If you have any questions about this Privacy Policy, please contact us through the Contact page.'),
+      ] %}
+      <h5 class="fw-700 text-sky mt-4 mb-2">{{ heading }}</h5>
+      <p class="text-muted">{{ body }}</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

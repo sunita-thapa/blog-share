@@ -1,0 +1,179 @@
+{# blog.html — Blog / Archive Page #}
+{% extends 'base.html' %}
+{% block title %}Blog{% endblock %}
+
+{% block content %}
+
+{# Page Header #}
+<div style="background:linear-gradient(135deg, var(--dark), #1e3a5f); padding:3rem 0; color:white;">
+  <div class="container">
+    <div class="divider-sky"></div>
+    <h1 style="font-family:var(--font-head); font-size:2.5rem; color:white; margin-bottom:.5rem;">
+      The Blog
+    </h1>
+    <p style="color:#cbd5e1; max-width:500px;">
+      Stories, tutorials, and ideas from our community of writers and developers.
+    </p>
+  </div>
+</div>
+
+<div class="section-pad">
+  <div class="container">
+
+    {# Search & Filter Bar #}
+    <div class="card mb-5 p-3">
+      <div class="row g-3 align-items-center">
+
+        {# Live search #}
+        <div class="col-md-5">
+          <div class="input-group">
+            <span class="input-group-text" style="background:var(--sky-light); border-color:var(--border);">
+              <i class="fa-solid fa-magnifying-glass text-sky"></i>
+            </span>
+            <input type="text" id="liveSearch" class="form-control"
+                   placeholder="Search articles..." value="{{ search }}" />
+          </div>
+        </div>
+
+        {# Category filter (URL-based) #}
+        <div class="col-md-4">
+          <form method="GET">
+            <select name="category" class="form-select" onchange="this.form.submit()">
+              <option value="">All Categories</option>
+              {% for (cat,) in categories %}
+                <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>
+                  {{ cat }}
+                </option>
+              {% endfor %}
+            </select>
+          </form>
+        </div>
+
+        {# Clear filters #}
+        <div class="col-md-3">
+          {% if selected_category or search %}
+            <a href="{{ url_for('blog') }}" class="btn-outline-crimson btn w-100">
+              <i class="fa-solid fa-xmark me-1"></i> Clear Filters
+            </a>
+          {% else %}
+            <span class="text-muted small">
+              Showing {{ posts.total }} article{{ 's' if posts.total != 1 else '' }}
+            </span>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+
+    {# Category pills #}
+    {% if categories %}
+    <div class="d-flex flex-wrap gap-2 mb-4">
+      <a href="{{ url_for('blog') }}"
+         class="tag {% if not selected_category %}tag-crimson{% endif %}">All</a>
+      {% for (cat,) in categories %}
+        <a href="{{ url_for('blog', category=cat) }}"
+           class="tag {% if selected_category == cat %}tag-crimson{% endif %}">
+          {{ cat }}
+        </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {# Posts Grid #}
+    {% if posts.items %}
+      <div class="row g-4" id="postsGrid">
+        {% for post in posts.items %}
+        <div class="col-md-6 col-lg-4 post-card-item">
+          <div class="card h-100">
+            {% if post.cover_image %}
+              <img src="{{ post.cover_image }}" alt="{{ post.title }}" class="post-card-img" />
+            {% else %}
+              <div class="post-card-img-placeholder">
+                {% set emojis = ['📝','💡','🚀','🌟','💻','🎨','📚','🔬','🌍','💬','⚡','🧠'] %}
+                {{ emojis[loop.index0 % emojis|length] }}
+              </div>
+            {% endif %}
+
+            <div class="card-body d-flex flex-column">
+              <span class="card-category">{{ post.category }}</span>
+              <h5 class="card-title">
+                <a href="{{ url_for('post_detail', slug=post.slug) }}">{{ post.title }}</a>
+              </h5>
+              <p class="card-excerpt flex-grow-1">
+                {{ post.excerpt or (post.content | truncate(100)) }}
+              </p>
+
+              {# Tags #}
+              {% if post.get_tags_list() %}
+              <div class="mb-2">
+                {% for tag in post.get_tags_list()[:3] %}
+                  <span class="tag" style="font-size:.7rem;">{{ tag }}</span>
+                {% endfor %}
+              </div>
+              {% endif %}
+
+              <div class="card-meta pt-2" style="border-top:1px solid var(--border);">
+                <span>{{ post.author.username }}</span>
+                <span class="dot">{{ post.reading_time() }}</span>
+                <span class="ms-auto views-badge">
+                  <i class="fa-regular fa-eye"></i> {{ post.views }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      {# "No results" message for live search #}
+      <div id="noResults" class="text-center py-5" style="display:none;">
+        <div style="font-size:3rem;">🔍</div>
+        <p class="text-muted mt-2">No articles match your search.</p>
+      </div>
+
+      {# Pagination #}
+      {% if posts.pages > 1 %}
+      <nav class="mt-5 d-flex justify-content-center">
+        <ul class="pagination">
+          {% if posts.has_prev %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('blog', page=posts.prev_num, category=selected_category) }}">
+                <i class="fa-solid fa-chevron-left"></i>
+              </a>
+            </li>
+          {% endif %}
+
+          {% for num in posts.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+            {% if num %}
+              <li class="page-item {% if num == posts.page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('blog', page=num, category=selected_category) }}">{{ num }}</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+          {% endfor %}
+
+          {% if posts.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('blog', page=posts.next_num, category=selected_category) }}">
+                <i class="fa-solid fa-chevron-right"></i>
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+
+    {% else %}
+      <div class="text-center py-5">
+        <div style="font-size:4rem;">📭</div>
+        <h5 class="text-muted mt-3">No articles found</h5>
+        <p class="text-muted">Try a different search term or category.</p>
+        <a href="{{ url_for('blog') }}" class="btn-sky btn mt-2">View All Posts</a>
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}

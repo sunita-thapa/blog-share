@@ -1,0 +1,143 @@
+{# register.html — User Registration Page #}
+{% extends 'base.html' %}
+{% block title %}Create Account{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card">
+
+    {# Logo #}
+    <div class="auth-logo">Blog<span>Sphere</span></div>
+    <p class="text-center text-muted mb-4" style="font-size:.9rem;">
+      Create your free account and start writing
+    </p>
+
+    {# Registration Form #}
+    <form method="POST" class="needs-validation" novalidate>
+
+      {# Full Name #}
+      <div class="mb-3">
+        <label class="form-label" for="full_name">Full Name</label>
+        <div class="input-group">
+          <span class="input-group-text border-end-0" style="background:var(--sky-light); border-color:var(--border);">
+            <i class="fa-regular fa-user text-sky"></i>
+          </span>
+          <input type="text" class="form-control border-start-0" id="full_name" name="full_name"
+                 placeholder="Jane Doe"
+                 value="{{ request.form.get('full_name', '') }}" />
+        </div>
+      </div>
+
+      {# Username #}
+      <div class="mb-3">
+        <label class="form-label" for="username">
+          Username <span class="text-crimson">*</span>
+        </label>
+        <div class="input-group">
+          <span class="input-group-text border-end-0" style="background:var(--sky-light); border-color:var(--border);">
+            <i class="fa-solid fa-at text-sky"></i>
+          </span>
+          <input type="text" class="form-control border-start-0" id="username" name="username"
+                 placeholder="janedoe123" required minlength="3"
+                 value="{{ request.form.get('username', '') }}" />
+          <div class="invalid-feedback">Username must be at least 3 characters.</div>
+        </div>
+      </div>
+
+      {# Email #}
+      <div class="mb-3">
+        <label class="form-label" for="email">
+          Email Address <span class="text-crimson">*</span>
+        </label>
+        <div class="input-group">
+          <span class="input-group-text border-end-0" style="background:var(--sky-light); border-color:var(--border);">
+            <i class="fa-regular fa-envelope text-sky"></i>
+          </span>
+          <input type="email" class="form-control border-start-0" id="email" name="email"
+                 placeholder="jane@example.com" required
+                 value="{{ request.form.get('email', '') }}" />
+          <div class="invalid-feedback">Please enter a valid email.</div>
+        </div>
+      </div>
+
+      {# Password #}
+      <div class="mb-2">
+        <label class="form-label" for="password">
+          Password <span class="text-crimson">*</span>
+        </label>
+        <div class="input-group">
+          <span class="input-group-text border-end-0" style="background:var(--sky-light); border-color:var(--border);">
+            <i class="fa-solid fa-lock text-sky"></i>
+          </span>
+          <input type="password" class="form-control border-start-0" id="password" name="password"
+                 placeholder="Min. 6 characters" required minlength="6" />
+          <button class="btn btn-outline-secondary border-start-0 toggle-pw" type="button"
+                  onclick="togglePw('password', this)">
+            <i class="fa-regular fa-eye"></i>
+          </button>
+        </div>
+        {# Password strength bar #}
+        <div class="mt-1" style="background:var(--border); border-radius:2rem; height:5px; overflow:hidden;">
+          <div id="password-strength" style="height:100%; width:0; transition:width .3s, background .3s; border-radius:2rem;"></div>
+        </div>
+        <small id="password-hint" class="text-muted">Strength: —</small>
+      </div>
+
+      {# Confirm Password #}
+      <div class="mb-4">
+        <label class="form-label" for="password2">
+          Confirm Password <span class="text-crimson">*</span>
+        </label>
+        <div class="input-group">
+          <span class="input-group-text border-end-0" style="background:var(--sky-light); border-color:var(--border);">
+            <i class="fa-solid fa-lock-open text-sky"></i>
+          </span>
+          <input type="password" class="form-control border-start-0" id="password2" name="password2"
+                 placeholder="Repeat your password" required />
+          <button class="btn btn-outline-secondary border-start-0" type="button"
+                  onclick="togglePw('password2', this)">
+            <i class="fa-regular fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      {# Terms #}
+      <div class="form-check mb-4">
+        <input class="form-check-input" type="checkbox" id="terms" required />
+        <label class="form-check-label small" for="terms">
+          I agree to the
+          <a href="{{ url_for('privacy') }}">Privacy Policy</a> &amp;
+          <a href="{{ url_for('cookies') }}">Cookie Policy</a>
+        </label>
+      </div>
+
+      <button type="submit" class="btn-sky btn w-100 py-2">
+        <i class="fa-solid fa-user-plus me-1"></i> Create Account
+      </button>
+    </form>
+
+    <p class="text-center mt-4 mb-0 small text-muted">
+      Already have an account?
+      <a href="{{ url_for('login') }}" class="fw-600 text-sky">Sign in here</a>
+    </p>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Toggle password visibility
+function togglePw(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const icon  = btn.querySelector('i');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.className = 'fa-regular fa-eye-slash';
+  } else {
+    input.type = 'password';
+    icon.className = 'fa-regular fa-eye';
+  }
+}
+</script>
+{% endblock %}

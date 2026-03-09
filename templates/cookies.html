@@ -1,0 +1,45 @@
+{# cookies.html #}
+{% extends 'base.html' %}
+{% block title %}Cookie Policy{% endblock %}
+{% block content %}
+<div style="background:linear-gradient(135deg,var(--dark),#1e3a5f);padding:3rem 0;color:white;">
+  <div class="container"><div class="divider-sky"></div>
+    <h1 style="font-family:var(--font-head);color:white;font-size:2rem;">Cookie Policy</h1>
+    <p style="color:#94a3b8;">Last updated: January 2025</p>
+  </div>
+</div>
+<div class="section-pad">
+  <div class="container" style="max-width:760px;">
+    <div class="card p-4 p-md-5">
+      <h5 class="fw-700 text-sky mb-2">What Are Cookies?</h5>
+      <p class="text-muted">Cookies are small text files stored on your device by your browser. They help websites remember information about your visit.</p>
+
+      <h5 class="fw-700 text-sky mt-4 mb-2">Cookies We Use</h5>
+      <div class="table-responsive">
+        <table class="table table-custom">
+          <thead><tr><th>Cookie</th><th>Purpose</th><th>Duration</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>session</code></td>
+              <td>Keeps you logged in during your visit</td>
+              <td>Browser session</td>
+            </tr>
+            <tr>
+              <td><code>cookiesAccepted</code></td>
+              <td>Remembers that you've dismissed the cookie banner</td>
+              <td>Persistent (localStorage)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-muted small">We do <strong>not</strong> use advertising, tracking, or analytics cookies.</p>
+
+      <h5 class="fw-700 text-sky mt-4 mb-2">Managing Cookies</h5>
+      <p class="text-muted">You can control cookies through your browser settings. Disabling the session cookie will prevent you from staying logged in.</p>
+
+      <h5 class="fw-700 text-sky mt-4 mb-2">Contact</h5>
+      <p class="text-muted mb-0">Questions? Reach us via the <a href="{{ url_for('contact') }}">Contact page</a>.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

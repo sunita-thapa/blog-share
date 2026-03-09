@@ -1,0 +1,239 @@
+{# portfolio.html — Public Portfolio Page #}
+{% extends 'base.html' %}
+{% block title %}{{ user.full_name or user.username }}'s Portfolio{% endblock %}
+
+{% block content %}
+
+{# Hero #}
+<div class="portfolio-hero">
+  <div class="container">
+    <div class="d-flex align-items-center gap-4 flex-wrap">
+      {% if user.avatar_url %}
+        <img src="{{ user.avatar_url }}" alt="" class="avatar-ring" />
+      {% else %}
+        <div class="avatar-placeholder">
+          {{ (user.full_name or user.username)[0].upper() }}
+        </div>
+      {% endif %}
+      <div>
+        <h1 style="color:white; font-family:var(--font-head); margin:0; font-size:2rem;">
+          {{ user.full_name or user.username }}
+        </h1>
+        <p style="color:#94a3b8; margin:.3rem 0 .75rem;">@{{ user.username }}</p>
+        {% if user.bio %}
+          <p style="color:#cbd5e1; max-width:480px; margin:0; font-size:.95rem;">{{ user.bio }}</p>
+        {% endif %}
+        <div class="d-flex gap-2 mt-3 flex-wrap">
+          {% if user.github %}
+            <a href="{{ user.github }}" target="_blank" class="social-btn">
+              <i class="fab fa-github"></i>
+            </a>
+          {% endif %}
+          {% if user.linkedin %}
+            <a href="{{ user.linkedin }}" target="_blank" class="social-btn">
+              <i class="fab fa-linkedin-in"></i>
+            </a>
+          {% endif %}
+          {% if user.website %}
+            <a href="{{ user.website }}" target="_blank" class="social-btn">
+              <i class="fa-solid fa-globe"></i>
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Navigation tabs #}
+<div style="background:white; border-bottom:1px solid var(--border); position:sticky; top:65px; z-index:99;">
+  <div class="container">
+    <div class="d-flex gap-1 overflow-auto" style="padding:.5rem 0;">
+      {% for anchor, label, icon in [
+        ('#projects',     'Projects',     'fa-folder-open'),
+        ('#skills',       'Skills',       'fa-star'),
+        ('#technologies', 'Technologies', 'fa-microchip'),
+        ('#posts',        'Articles',     'fa-newspaper'),
+      ] %}
+      <a href="{{ anchor }}"
+         class="btn btn-sm rounded-pill fw-500 px-3"
+         style="white-space:nowrap; color:var(--text); transition:all .2s;"
+         onmouseover="this.style.background='var(--sky-light)'; this.style.color='var(--sky-dark)';"
+         onmouseout="this.style.background=''; this.style.color='var(--text)';">
+        <i class="fa-solid {{ icon }} me-1"></i> {{ label }}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+
+{# ---- PROJECTS ---- #}
+<section id="projects" class="section-pad">
+  <div class="container">
+    <div class="divider-sky"></div>
+    <h2 class="section-title mb-1">Projects</h2>
+    <p class="text-muted mb-4">Things I've built</p>
+
+    {% if projects %}
+    <div class="row g-4">
+      {% for project in projects %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+          {% if project.image_url %}
+            <img src="{{ project.image_url }}" alt="{{ project.title }}" class="post-card-img" />
+          {% else %}
+            <div class="post-card-img-placeholder">🚀</div>
+          {% endif %}
+
+          <div class="card-body d-flex flex-column">
+            {% if project.is_featured %}
+              <span class="tag tag-crimson mb-2" style="width:fit-content;">⭐ Featured</span>
+            {% endif %}
+            <h5 class="card-title">{{ project.title }}</h5>
+            <p class="card-excerpt flex-grow-1">{{ project.description | truncate(120) }}</p>
+
+            {% if project.tech_stack %}
+            <div class="mb-3">
+              {% for tech in project.tech_stack.split(',') %}
+                <span class="tag" style="font-size:.72rem;">{{ tech.strip() }}</span>
+              {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="d-flex gap-2 mt-auto">
+              {% if project.github_url %}
+                <a href="{{ project.github_url }}" target="_blank" class="btn-outline-sky btn btn-sm">
+                  <i class="fab fa-github me-1"></i> Code
+                </a>
+              {% endif %}
+              {% if project.live_url %}
+                <a href="{{ project.live_url }}" target="_blank" class="btn-sky btn btn-sm">
+                  <i class="fa-solid fa-up-right-from-square me-1"></i> Live
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+      <p class="text-muted">No projects added yet.</p>
+    {% endif %}
+  </div>
+</section>
+
+
+{# ---- SKILLS ---- #}
+<section id="skills" class="section-pad" style="background:white;">
+  <div class="container">
+    <div class="divider-sky"></div>
+    <h2 class="section-title mb-1">Skills</h2>
+    <p class="text-muted mb-4">What I know and how well I know it</p>
+
+    {% if skill_categories %}
+      <div class="row g-4">
+        {% for category, cat_skills in skill_categories.items() %}
+        <div class="col-md-6">
+          <div class="card p-4 h-100">
+            <h6 class="fw-700 text-sky mb-3">{{ category }}</h6>
+            {% for skill in cat_skills %}
+            <div class="skill-bar-wrap">
+              <div class="skill-bar-header">
+                <span>{{ skill.name }}</span>
+                <span class="text-muted">{{ skill.proficiency }}%</span>
+              </div>
+              <div class="skill-bar-bg">
+                <div class="skill-bar-fill" data-width="{{ skill.proficiency }}" style="width:0;"></div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted">No skills listed yet.</p>
+    {% endif %}
+  </div>
+</section>
+
+
+{# ---- TECHNOLOGIES ---- #}
+<section id="technologies" class="section-pad">
+  <div class="container">
+    <div class="divider-sky"></div>
+    <h2 class="section-title mb-1">Technologies</h2>
+    <p class="text-muted mb-4">Tools and platforms I work with</p>
+
+    {% if technologies %}
+      {# Group by category #}
+      {% set tech_cats = {} %}
+      {% for tech in technologies %}
+        {% if tech.category not in tech_cats %}
+          {% set _ = tech_cats.update({tech.category: []}) %}
+        {% endif %}
+        {% set _ = tech_cats[tech.category].append(tech) %}
+      {% endfor %}
+
+      {% for cat, cat_techs in tech_cats.items() %}
+      <h6 class="fw-600 text-muted mb-2">{{ cat }}</h6>
+      <div class="d-flex flex-wrap gap-2 mb-4">
+        {% for tech in cat_techs %}
+        <div class="d-flex align-items-center gap-2 px-3 py-2 rounded-xl"
+             style="background:{{ tech.badge_color }}15; border:1.5px solid {{ tech.badge_color }}40;">
+          <span style="width:8px; height:8px; border-radius:50%; background:{{ tech.badge_color }}; display:inline-block;"></span>
+          <span class="fw-600" style="font-size:.88rem; color:{{ tech.badge_color }};">{{ tech.name }}</span>
+          {% if tech.description %}
+            <span class="text-muted" style="font-size:.78rem;">— {{ tech.description }}</span>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    {% else %}
+      <p class="text-muted">No technologies listed yet.</p>
+    {% endif %}
+  </div>
+</section>
+
+
+{# ---- LATEST POSTS ---- #}
+{% if posts %}
+<section id="posts" class="section-pad" style="background:white;">
+  <div class="container">
+    <div class="divider-sky"></div>
+    <h2 class="section-title mb-1">Latest Articles</h2>
+    <p class="text-muted mb-4">Recent writing from {{ user.full_name or user.username }}</p>
+
+    <div class="row g-4">
+      {% for post in posts %}
+      <div class="col-md-4">
+        <div class="card h-100">
+          <div class="post-card-img-placeholder">📝</div>
+          <div class="card-body">
+            <span class="card-category">{{ post.category }}</span>
+            <h5 class="card-title">
+              <a href="{{ url_for('post_detail', slug=post.slug) }}">{{ post.title }}</a>
+            </h5>
+            <p class="card-excerpt">{{ post.excerpt or (post.content | truncate(100)) }}</p>
+            <div class="card-meta">
+              <span>{{ post.created_at | format_date }}</span>
+              <span class="ms-auto">{{ post.reading_time() }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="mt-4">
+      <a href="{{ url_for('blog') }}" class="btn-outline-sky btn">
+        Read All Articles <i class="fa-solid fa-arrow-right ms-1"></i>
+      </a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}
